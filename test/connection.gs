@@ -40,7 +40,7 @@ function InsertData(){
   var dest_sheet = ss.getSheetByName('DestSheetName');
   var param_1 = "blah" ;
   
-  var sql_statement = "SELECT * FROM "tableName" WHERE vertical = '"+param_1+"' AND param_2 NOT IN ('foo','bar') AND week >= CURDATE() - INTERVAL 10 WEEK" ; 
+  var sql_statement = "SELECT * FROM "tableName" WHERE param_1 = '"+param_1+"' AND param_2 NOT IN ('foo','bar') AND week >= CURDATE() - INTERVAL 10 WEEK" ; 
   try{
     var results = connection.createStatement().executeQuery( sql_statement );
     var metaData = results.getMetaData();
