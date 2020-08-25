@@ -5,6 +5,7 @@ function InsertData(){
   var conn = new MyConnection() ;                                        // instantiate a connection object
   var stmt = conn.createStatement();
   var data = data_transform() ;
+  var start = new Date();
 //  conn.setAutoCommit(false);                                           // this should be set with bulk insert if I remember correctly
   
   stmt.executeUpdate('DELETE FROM table_name');
@@ -29,8 +30,57 @@ function InsertData(){
 //  var batch = stmt.executeBatch();
 //  //Logger.log(sql) ;
   
+
   stmt.close();
 //  conn.commit();
+  
+
+// READING FRON A TABLE
+  var ss = SpreadsheetApp.getActive();
+  var dest_sheet = ss.getSheetByName('DestSheetName');
+  var param_1 = "blah" ;
+  
+  var sql_statement = "SELECT * FROM "tableName" WHERE vertical = '"+param_1+"' AND param_2 NOT IN ('foo','bar') AND week >= CURDATE() - INTERVAL 10 WEEK" ; 
+  try{
+    var results = connection.createStatement().executeQuery( sql_statement );
+    var metaData = results.getMetaData();
+    var columns = metaData.getColumnCount();
+    
+    // Retrieve metaData to a 2D array
+    var values = [];
+    var value = [];
+    var element = '';
+ 
+    // Get table headers
+    for(i = 1; i <= columns; i ++){
+      element = metaData.getColumnLabel(i);
+      value.push(element);
+    }
+    values.push( value );
+    
+    // Get table data row by row
+    while(results.next()){
+      value = [];
+      for(i = 1; i <= columns; i ++){
+        element = results.getString(i);
+        value.push(element);
+      }
+      values.push(value);
+    }
+  
+    // Close cursor object
+    results.close();
+    
+    // Write data to sheet Data
+    dest_sheet.clear();
+    SpreadsheetApp.flush();
+    dest_sheet.getRange(1, 1, values.length, value.length).setValues(values);
+    SpreadsheetApp.getActive().toast('You data has been refreshed.');
+  }catch(err){
+    SpreadsheetApp.getActive().toast( err.message );
+  } 
+  
+  // ALWAYS CLOSE CONNECTION OBJECT
   conn.close();
   
   var end = new Date();
