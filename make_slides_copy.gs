@@ -40,22 +40,3 @@ function duplicateSlide() {
 
 }
 
-function send_email(recepients, email_title, template_name, slide_url){
-  // var attachment_file = DriveApp.getFileById("file_id").getAs(MimeType.PDF);            // attach the file as a PDF
-  var htmlData = [email_title, slide_url];
-  var html = HtmlService.createTemplateFromFile(template_name);
-  html.data = htmlData;
-  
-  var htmlTemplate = html.evaluate().getContent();
-  
-  var emailBody = {
-    to: recepients, //"email@email.com", //
-    subject: email_title, 
-    //attachments: [attachment_file],                                                       // incase of an attachement
-    htmlBody: htmlTemplate 
-  }
-
-  MailApp.sendEmail(emailBody);           //SEND THE EMAIL
-  //Logger.log("Success !");
-  
-}
