@@ -1,3 +1,33 @@
+
+function send_email(recepients, email_title, template_name, file_url){
+  
+  /* MODULE TO SEND AN EMAIL WITH ATTCHMENTS AND AN OPTION LINK TO A FILE ON GOOGLE DRIVE
+    recepients - str     : should be a string comma separated
+    email_title - str    : title of the email to be sent
+    template_name - str  : this is the name of the email template always an HTML file
+    file_url - str       : a url for the attachment on GDRIVE
+ */
+  
+  // var attachment_file = DriveApp.getFileById("file_id").getAs(MimeType.PDF);            // attach the file as a PDF
+  var htmlData = [email_title, file_url];
+  var html = HtmlService.createTemplateFromFile(template_name);
+  html.data = htmlData;
+  
+  var htmlTemplate = html.evaluate().getContent();
+  
+  var emailBody = {
+    to: recepients, //"email@email.com", //
+    subject: email_title, 
+    //attachments: [attachment_file],                                                       // incase of an attachement
+    htmlBody: htmlTemplate 
+  }
+
+  MailApp.sendEmail(emailBody);           //SEND THE EMAIL
+  //Logger.log("Success !");
+  
+}
+
+
 function getPastWeeks(weeks){
   /* DYNAMICALLY GET THE START DATE OF N NUMBER OF WEEKS AGO
   * @param {int} range : takes a 2d array of a single array values
