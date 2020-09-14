@@ -1,30 +1,30 @@
 
 function send_email(recepients, email_title, template_name, file_url){
-  
+
   /* MODULE TO SEND AN EMAIL WITH ATTCHMENTS AND AN OPTION LINK TO A FILE ON GOOGLE DRIVE
     recepients - str     : should be a string comma separated
     email_title - str    : title of the email to be sent
     template_name - str  : this is the name of the email template always an HTML file
     file_url - str       : a url for the attachment on GDRIVE
  */
-  
+
   // var attachment_file = DriveApp.getFileById("file_id").getAs(MimeType.PDF);            // attach the file as a PDF
   var htmlData = [email_title, file_url];
   var html = HtmlService.createTemplateFromFile(template_name);
   html.data = htmlData;
-  
+
   var htmlTemplate = html.evaluate().getContent();
-  
+
   var emailBody = {
     to: recepients, //"email@email.com", //
-    subject: email_title, 
+    subject: email_title,
     //attachments: [attachment_file],                                                       // incase of an attachement
-    htmlBody: htmlTemplate 
+    htmlBody: htmlTemplate
   }
 
   MailApp.sendEmail(emailBody);           //SEND THE EMAIL
   //Logger.log("Success !");
-  
+
 }
 
 
@@ -38,7 +38,7 @@ function getPastWeeks(weeks){
   var startOfThisWeek = new Date(today - (today.getDay() * 24 * 3600 * 1000));
   var weeksAgo = Utilities.formatDate(new Date(startOfThisWeek - (weeks * 7 * 24 * 3600 * 1000)) ,'Africa/Nairobi', "YYYY-MM-dd");
 //  var weeksAgo = new Date(startOfThisWeek - (1 * 7 * 24 * 3600 * 1000));
-  
+
   return weeksAgo;
 }
 
@@ -46,8 +46,8 @@ function getPastWeeks(weeks){
 function MyConnection() {
   var ss = SpreadsheetApp.getActive();
   var sheetDetails = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Details');  // Details is just a tab holding the credentials
-  var sheetData = ss.getSheetByName('Data');                                           // Data is the tab that the data is being saved into 
- 
+  var sheetData = ss.getSheetByName('Data');                                           // Data is the tab that the data is being saved into
+
   this.host = sheetDetails.getRange("B1").getValue();
   this.databaseName = sheetDetails.getRange("B2").getValue();
   this.userName = sheetDetails.getRange("B3").getValue();
@@ -56,7 +56,7 @@ function MyConnection() {
   this.tableName = sheetDetails.getRange("B6").getValue();
 
   var currentMonth = Utilities.formatDate(new Date(), "GMT+03:00", "YYYY-MM-01");
-  
+
   this.url = 'jdbc:mysql://'+ this.host +':3306/'+ this.databaseName;
 
   try{
@@ -64,13 +64,13 @@ function MyConnection() {
     return this.connection ;
   }
   catch( err ) {
-    SpreadsheetApp.getActive().toast(err.message);                                                         // this give a pop up on the main sheet view 
+    SpreadsheetApp.getActive().toast(err.message);                                                         // this give a pop up on the main sheet view
   }
 }
 
 
 function custom_last_data_cell(range, orientation){
-  
+
  /* Gets the last row or column number based on a selected range values and orientation
  * @param {array} range : takes a 2d array of a single array values
  * @param {string} orientation : if passing data from a row the 'row' else if data from a column then 'col'
@@ -80,9 +80,9 @@ function custom_last_data_cell(range, orientation){
  https://docs.google.com/spreadsheets/d/1l6qq5tb03QnWoyNDT5TWx6QvNsmHp1Bu_Cmv0HxnIQo/edit#gid=6
  https://stackoverflow.com/questions/53538956/how-to-get-range-and-then-set-value-in-google-apps-script
  */
-  
+
   var index_count = 0;
-  if ( orientation == "row" ){ 
+  if ( orientation == "row" ){
     for(var index = 0; index < range[0].length; index++){
       if((typeof range[0][index] === "string" || typeof range[0][index] === "number" || (range[0][index] instanceof Date)) && range[0][index] !== "")
       {
@@ -90,7 +90,7 @@ function custom_last_data_cell(range, orientation){
       }
     }
   }
-  
+
   else if ( orientation == "col" ){
    for( var index = 0; index < range.length; index++ ){
     if((typeof range[index][0] === "string" || typeof range[index][0] === "number" || (range[index][0] instanceof Date)) && range[index][0] !== "")
@@ -99,12 +99,31 @@ function custom_last_data_cell(range, orientation){
     }
    }
   }
-  
+
   return index_count;
 }
 
 
-
+function typeCheck(data, type){
+  if(type == "str"){
+    if(typeof data === "string" && data !== ""){
+      return true
+      }
+    }
+  else if(type == "int"){
+    if(typeof data === "number" && data !== ""){
+      return true
+      }
+    }
+  else if(type == "date"){
+    if( ( data instanceof Date) && (data !== "") ){
+      return true
+      }
+    }
+  else {
+    return false
+    }
+}
 
 
 
