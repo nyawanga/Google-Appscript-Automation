@@ -125,6 +125,54 @@ function typeCheck(data, type){
     }
 }
 
-
+ /**
+  * Fuction to unpivot and flatten data that has been set up as a pivot
+  * @param {array}   data           : range of data to unpivot
+  * @param {string}  control_args   : DEFAULT="0;-1" showing the column index with dimension and no cols to skip.should list dimension columns separated by comma and separate skip rows by semi colon also listed comma separated
+  *                                   Example is UnPivotData(range, '0,1;2,3') considers columns in index 0 and 1 for dimensions and skips columns 2 and 3
+  @return array of transformed / flattened data
+  * @customFunction
+  **/
+function UnPivotData(data, control_args="0;-1"){
+//  var ss = SpreadsheetApp.getActive() ;
+//  var test = ss.getSheetByName("tests");
+//  var data = test.getRange("A1:E6").getValues() ;
+//  var row_dims = row_dims=[0,1] //1
+//  var skip_cols = [-1]
+  
+  var row_dims = control_args.split(";")[0].split(",").map(Number)     // found it hard to pass arrays hacked using strings and split
+  var skip_cols = control_args.split(";")[1].split(",").map(Number)
+  var records = []
+  
+  for( var idx=0; idx < data.length ; idx++){
+    var header_dim = data[0]
+    
+    var row = data[idx]
+    if( idx > 0 ){                                                  // loop through rows
+      
+      for( var col_idx=0 ; col_idx < row.length ; col_idx++ ){
+        var record = []
+        
+        var cell_value = row[col_idx]
+        for( var index in row_dims ){                              //var row_dims_idx = 0 ; row_dims_idx < row_dims.length ; row_dims_idx++ ){
+          var row_dim_item = row_dims[index] 
+          var row_dim = row[row_dim_item]
+          record.push( row_dim )                                   // loop through the row headers adding to array
+        }
+        if( row_dims.indexOf(col_idx) < 0 && skip_cols.indexOf(col_idx) < 0 ){                                 // loop through columns                                    
+          var col_dim = header_dim[col_idx]
+          record.push( col_dim )                                   // add column header
+          record.push( cell_value )                                // add cell value
+            
+          Logger.log( record )
+          records.push( record )                                   // add to final array
+        }
+      }
+    }
+  }
+  Logger.log( records )
+  
+  return records
+}
 
 
