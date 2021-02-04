@@ -176,3 +176,87 @@ function UnPivotData(data, control_args="0;-1"){
 }
 
 
+ /*
+ *********************************
+ The function changes file owners in your drive (the person running the script) and assings them to the specified new owner.
+ It also moves them to a fpecified folder for organization purposes
+ Incase of failures the file urls are posted in the respective sheets as i.e move_failures and reassign_failures
+ Run from the googlesheets for ease of the last step 
+ 
+ * @param {string}  newOwner
+ * @param {string}  destinationFolderId
+ * @param {string}  
+ */
+
+function changeOwnerAndMove( newOwner,destinationFolderId,moveFiles=true ) {
+
+    var ss = SpreadsheetApp.getActive();
+    var newOwner = newOwner ;                                                   // Email of the new owner
+    var destinationFolderId = destinationFolderId;
+    var reassignFailures = [];
+    var moveFailures = [];
+    var reassignFailureSheet = ss.getSheetByName("reassign_failures");
+    var moveFailureSheet = ss.getSheetByName("move_failures");
+    
+    var files = DriveApp.searchFiles('"me" in owners');                           // Get all the files in Google Drive for the user running this script
+    var destFolder = DriveApp.getFolderById(destinationFolderId)                  // Get destination folder
+
+    //// Loop through every file
+    while ( files.hasNext() ) {
+      var file = files.next();
+  //    if(file.getId() == "1s8CwBjNN8XyffGniS9kYl4oat6aVgnAR0C2nLR5h0Ek" || file.getId() == "1Cv3ErHcyPgABIOyNvCGJ_KhBfGQaZ8woXq8UQ1C3afg") {    
+        var file_name = file.getName();                                           // Assign the file name to a variable
+        var file_id = file.getId()                                                // Get file ID
+        
+        Logger.log("Changing ownership of " + file_name + " to " + newOwner);    // Log the name of the file changing ownership
+        
+        try {
+            file.addEditor(newOwner);                                           // Set the owner to be the new owner
+        }
+        catch(err){
+            Logger.log(err.message);
+        }
+        try { 
+            file.setOwner( newOwner );
+        }
+        catch(err){
+          reassignFailures.push( [ file.getUrl() ] );                                 // add failed file to reassingFailures
+         Logger.log( err.message ); 
+        }
+
+        // Move the file to the specified folder
+        if( moveFiles == true || moveFiles == "true" ){
+            try { 
+                destFolder.addFile( file );
+                file.getParents().next().removeFile( file );
+            }
+            catch(err){
+                moveFailures.push( [ file.getUrl() ] ) ;                                   // add failed file to moveFailures
+                Logger.log( err.message ); 
+            }
+        }
+    //}
+    }
+    
+    // Kepp a record of failures in the respective sheets 
+    if( reassignFailureSheet.length > 0 ){
+      reassignFailureSheet.getRange( 1,1,reassignFailures.length,1 ).setValues( reassignFailures ) ;  
+    }
+    else if( moveFailures.length > 0 ){
+      moveFailureSheet.getRange( 1,1,moveFailures.length,1 ).setValues( moveFailures ) ;
+    }
+}
+
+// function moveFiles(file_id, dest_id){
+//   //https://tanaikech.github.io/2019/11/20/moving-file-to-specific-folder-using-google-apps-script/
+
+//   var sourceFileId = file_id;
+//   var destinationFolderId = dest_id;
+
+//   var file = DriveApp.getFileById(sourceFileId);
+//   DriveApp.getFolderById(destinationFolderId).addFile(file);
+//   file
+//     .getParents()
+//     .next()
+//     .removeFile(file);
+// }
