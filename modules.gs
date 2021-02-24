@@ -204,7 +204,7 @@ function changeOwnerAndMove( newOwner,destinationFolderId,moveFiles=true ) {
     //// Loop through every file
     while ( files.hasNext() ) {
       var file = files.next();
-  //    if(file.getId() == "1s8CwBjNN8XyffGniS9kYl4oat6aVgnAR0C2nLR5h0Ek" || file.getId() == "1Cv3ErHcyPgABIOyNvCGJ_KhBfGQaZ8woXq8UQ1C3afg") {    
+  //    if(file.getId() == "1s8CwBjNN8XyffGniS9kYl4oat6aVgnAR0C2n" || file.getId() == "1Cv3ErHcyPgABIOyNvCGJ_KhBfGQaZ8woXq8UQ1") {    
         var file_name = file.getName();                                           // Assign the file name to a variable
         var file_id = file.getId()                                                // Get file ID
         
@@ -260,3 +260,30 @@ function changeOwnerAndMove( newOwner,destinationFolderId,moveFiles=true ) {
 //     .next()
 //     .removeFile(file);
 // }
+
+
+
+ /*
+ ****************************************************************************************
+ A function that assigns a datetime everytime a cell is edited 
+ 
+ //https://webapps.stackexchange.com/questions/54527/onedit-only-updates-top-row-after-pasting-editing-multiple-rows
+ //https://developers.google.com/apps-script/guides/triggers/events
+ */
+function onEdit( e ){
+
+  var ss = SpreadsheetApp.getActiveSheet();
+  var range = e.range ;
+  var change = range.getValue();
+  var row = range.getRow() ;
+  var dateValue = ss.getRange(row, 3,1,1).getValue() ;
+  var timeCol = 2 ;
+  var focusTab = "TabName" ;
+
+  if( ss.getName() == focusTab  && typeCheck(dateValue, "date") ){ 
+    //&& (typeCheck(change, "int") || typeCheck(change, "str") || typeCheck(change, "date"))){ 
+    var t = Utilities.formatDate( new Date(),"GMT+3", "YYYY-MM-dd HH:mm:ss")
+    ss.getRange(row, timeCol,1,1).setValue(t)
+  }
+  
+}
